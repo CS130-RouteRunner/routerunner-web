@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Format python files to be PEP8 compliant
+autopep8 --in-place --recursive .
+
+# Run JSHint validation
+js_files=$(git diff --name-only --staged -- *.js **/*.js)
+pass=true
+echo "$js_files"
+if [ "$js_files" != "" ]; then
+    for file in ${js_files}; do
+        result=$(jshint ${file})
+
+        if [ "$result" != "" ]; then
+            echo "$result"
+            pass=false
+        fi
+    done
+fi
+
+if $pass; then
+    exit 0
+else
+    echo "Some JavaScript files are invalid. Please fix errors and try committing again."
+    exit 1
+fi
+

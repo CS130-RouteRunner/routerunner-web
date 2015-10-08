@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# http://blog.ittybittyapps.com/blog/2013/09/03/git-pre-push/
+
+cmd="nosetests tests"
+master_branch='master'
+curr_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+
+if [[ $curr_branch = $master_branch ]]; then
+    origin=$1
+    git branch -u $origin/$curr_branch
+
+    # Check if there are unpushed commits
+    commits=`git log @{u}..`
+    if [ -z "$commits" ]; then
+        exit 0
+    fi
+
+    echo "Starting unit tests..."
+
+    $cmd
+    result=$?
+    if [ $result -ne 0 ]; then
+        echo "failed $cmd"
+        exit 1
+    fi
+fi
+exit 0

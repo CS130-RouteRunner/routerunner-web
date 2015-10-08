@@ -1,0 +1,29 @@
+application: route-runner-130
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+handlers:
+- url: /api/.*
+  script: main.app
+
+- url: (.*)/
+  static_files: app\1/index.html
+  upload: app
+
+- url: (.*)
+  static_files: app\1
+  upload: app
+
+- url: /static/([^/]*)/(js|css|img|html)/(.*)
+  static_files: app/static/\2/\3
+  upload: app/static/(js|css|img|html)/(.*)
+
+libraries:
+- name: webapp2
+  version: "2.5.2"
+
+skip_files:
+- ^tmp
+- ^(.*/)?.*\.py[co]
