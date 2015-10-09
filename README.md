@@ -18,5 +18,6 @@ https://cloud.google.com/appengine/downloads?hl=en_US&&_ga=1.155433339.191772721
 
 ## Resources
 * Good Python libraries: [itertools](https://docs.python.org/2/library/itertools.html) and [collections](https://docs.python.org/2/library/collections.html)
+* [Unit Testing](https://docs.python.org/2/library/unittest.html)
 * [NDB Cheatsheet](https://docs.google.com/document/d/1AefylbadN456_Z7BZOpZEXDq8cR8LYu7QgI7bt5V0Iw/mobilebasic?pli=1)
 
