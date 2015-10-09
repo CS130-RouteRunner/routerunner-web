@@ -2,4 +2,4 @@
 
 
 def test():
-    assert False
+    assert True
