@@ -6,7 +6,7 @@ Creates the master app and the url routes.
 
 import webapp2
 
-from api import song
+from api import map
 
 
 class MainHandler(webapp2.RequestHandler):
@@ -18,6 +18,6 @@ routes = [
     ('/', MainHandler),
 ]
 
-routes += song.routes
+routes += map.routes
 
 app = webapp2.WSGIApplication(routes, debug=True)

@@ -7,9 +7,9 @@ app.config(['$routeProvider',
     function($routeProvider) {
         $routeProvider.
             when('/songs', {
-                templateUrl: 'static/html/song/song.html',
-                controller: 'songController',
-                controllerAs: 'songCon'
+                templateUrl: 'static/html/map/map.html',
+                controller: 'mapController',
+                controllerAs: 'mapCon'
             }).
             otherwise({
                 redirectTo: '/songs'
