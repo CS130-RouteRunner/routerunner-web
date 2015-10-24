@@ -11,10 +11,12 @@ handlers:
 - url: (.*)/
   static_files: app\1/index.html
   upload: app
+  login: admin
 
 - url: (.*)
   static_files: app\1
   upload: app
+  login: admin
 
 - url: /static/([^/]*)/(js|css|img|html)/(.*)
   static_files: app/static/\2/\3
@@ -23,6 +25,8 @@ handlers:
 libraries:
 - name: webapp2
   version: "2.5.2"
+- name: pycrypto
+  version: "2.6"
 
 skip_files:
 - ^tmp

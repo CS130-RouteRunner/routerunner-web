@@ -35,15 +35,19 @@
 
     <!-- Controllers-->
     <script src="static/js/controllers/map.js"></script>
+    <script src="static/js/controllers/matchmaking.js"></script>
 
     <!-- CSS files -->
     <link rel="stylesheet" href="static/css/map.css">
 </head>
-<body data-ng-app="testApp">
+<body data-ng-app="routeRunner">
 
-    <div data-ng-controller="testController as testCon">
-        <p data-ng-bind="testCon.message"></p>
+    <div data-ng-controller="mainController as mainCon">
+        <p data-ng-bind="mainCon.message"></p>
     </div>
+    <a href="#/maps">Go to maps</a>
+    <a href="#/matchmaking">Go to matchmaking</a>
+
     <div data-ng-view></div>
 </body>
 </html>

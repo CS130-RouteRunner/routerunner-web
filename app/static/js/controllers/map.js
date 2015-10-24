@@ -1,10 +1,10 @@
 'use strict';
 
-app.controller("mapController", function($http, mapResource) {
+app.controller("mapController", function(mapResource) {
     var self = this;
     self.accessToken = 'pk.eyJ1IjoicmNoZW45MyIsImEiOiJjaWcyeDZ1NzExZ3FidGxreHpiNG5neTV5In0.0ZjmL0S4tNln-Op6vQzuRQ';
-    self.mapCenter = [34.068921, -118.4473698,17];
-    self.defaultZoomLevel = 15;
+    self.mapCenter = [34.068921, -118.4473698,17];  // lat,lng
+    self.defaultZoomLevel = 16;
     self.decimalPrecision = 5;  // 4 decimal points
 
     // Provide your access token
