@@ -1,0 +1,7 @@
+#chat {
+ height: 33em;
+ overflow: auto;
+ background-color: #EEE;
+ border-radius: .25em;
+ margin-bottom: 1em;
+}

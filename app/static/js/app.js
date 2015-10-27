@@ -31,4 +31,10 @@ app.controller("mainController", function($http) {
 
     self.message = "Wechanged soemthtingnggn";
 
+    self.endpoints = [
+        "/api/matchmaking/new",
+        "/api/matchmaking/join",
+        "/api/matchmaking/start"
+    ];
+
 });
