@@ -6,23 +6,24 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
     self.showLobby = false;
     self.messages = [];
     self.lobbies = joinLobbyResource.query(function() {});
+    console.log(self.lobbies);
 
     self.createLobby = function() {
-        var user_id = {uid: '12345'};
+        var user_id = {uid: '72cf413c-324e-4ec2-b04b-6e6eee969a08'};
         newLobbyResource.save(angular.toJson(user_id), function(success) {
             self.success = success.data;
             self.lobbyId = success['lobby-id'];
             self.messages.push("Welcome to routerunner-" + self.lobbyId);
-            self.lobbies.push(self.lobbyId);
+            //self.lobbies.push(self.lobbyId);
             self.showLobby = true;
-
         }, function(failure) {
             self.error = failure.data;
         });
     };
 
     self.joinLobby = function(lobby_id) {
-        joinLobbyResource.save(angular.toJson({cid: lobby_id}), function(success) {
+        var request = {cid: lobby_id, uid: "cff9ea12-2fe4-40fc-b237-96e42bced00e"};
+        joinLobbyResource.save(angular.toJson(request), function(success) {
             self.success = success.data;
             self.messages.push("Someone has joined the lobby");
             self.showLobby = true;

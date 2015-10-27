@@ -8,7 +8,7 @@ class User(ndb.Model):
     """Model that represents a single User."""
     # User profile
     google_id = ndb.StringProperty()
-    email = ndb.StringProperty()
+    email = ndb.StringProperty(indexed=False)
     # Unique id provided by PubNub
     uuid = ndb.StringProperty()
     # In-game name of user
