@@ -1,14 +1,8 @@
 <p data-ng-bind="matchmakingCon.message"></p>
+<h4>Current Lobbies</h4>
+<ul data-ng-repeat="lobby in matchmakingCon.lobbies">
+    <li><a data-ng-bind="lobby" data-ng-click="matchmakingCon.joinLobby(lobby)"></a></li>
+</ul>
+
 <button data-ng-click="matchmakingCon.createLobby()">Create Lobby</button>
 
-<div data-ng-show="matchmakingCon.showLobby" id="chat">
-    <ul data-ng-repeat="msg in matchmakingCon.messages">
-        <li data-ng-bind="msg"></li>
-    </ul>
-</div>
-
-<div data-ng-show="matchmakingCon.lobbies.length !== 0">
-    <ul data-ng-repeat="lobby in matchmakingCon.lobbies">
-        <li><a data-ng-bind="lobby" data-ng-click="matchmakingCon.joinLobby(lobby)"></a></li>
-    </ul>
-</div>

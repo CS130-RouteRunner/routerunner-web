@@ -6,13 +6,9 @@ from google.appengine.ext import ndb
 
 class User(ndb.Model):
     """Model that represents a single User."""
-    # User profile
-    google_id = ndb.StringProperty()
-    email = ndb.StringProperty(indexed=False)
-    # Unique id provided by PubNub
+    # Unique id for pubnub
     uuid = ndb.StringProperty()
-    # In-game name of user
-    nickname = ndb.StringProperty(indexed=False)
+    nickname = ndb.StringProperty()
 
     # Statistics
     win = ndb.IntegerProperty(indexed=False)

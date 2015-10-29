@@ -44,6 +44,12 @@
 
     <div data-ng-controller="mainController as mainCon">
         <p data-ng-bind="mainCon.message"></p>
+        <div>
+            Endpoints you can hit
+            <ul data-ng-repeat="endpoint in mainCon.endpoints">
+                <li data-ng-bind="endpoint"></li>
+            </ul>
+        </div>
     </div>
     <a href="#/maps">Go to maps</a>
     <a href="#/matchmaking">Go to matchmaking</a>

@@ -5,39 +5,40 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
     self.message = "Matchmaking Controller";
     self.showLobby = false;
     self.messages = [];
-    self.lobbies = joinLobbyResource.query(function() {});
-    console.log(self.lobbies);
+    self.lobbies = joinLobbyResource.get(function(resp) {
+        self.lobbies = resp.lobbies;
+    });
+
+    function randomString() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for( var i = 0; i < 5; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
+    }
 
     self.createLobby = function() {
-        var user_id = {uid: '72cf413c-324e-4ec2-b04b-6e6eee969a08'};
-        newLobbyResource.save(angular.toJson(user_id), function(success) {
+        var user = randomString();
+        var request = {uid: user};
+
+        newLobbyResource.save(angular.toJson(request), function(success) {
             self.success = success.data;
-            self.lobbyId = success['lobby-id'];
-            self.messages.push("Welcome to routerunner-" + self.lobbyId);
-            //self.lobbies.push(self.lobbyId);
-            self.showLobby = true;
+            self.lobbyId = success.lid;
+            self.lobbies.push(self.lobbyId);
         }, function(failure) {
             self.error = failure.data;
         });
     };
 
     self.joinLobby = function(lobby_id) {
-        var request = {cid: lobby_id, uid: "cff9ea12-2fe4-40fc-b237-96e42bced00e"};
+        var user = randomString();
+        var request = {lid: lobby_id, uid: user};
         joinLobbyResource.save(angular.toJson(request), function(success) {
             self.success = success.data;
-            self.messages.push("Someone has joined the lobby");
-            self.showLobby = true;
         }, function(failure) {
             self.error = failure.data;
         });
-
-        //var channel_id = {cid: 'routerunner-12345'};
-        //newLobbyResource.save(angular.toJson(channel_id), function(success) {
-        //    self.success = success.data;
-        //    self.messages.push("Someone has joined the lobby");
-        //    self.showLobby = true;
-        //}, function(failure) {
-        //    self.error = failure.data;
-        //});
     };
 });
