@@ -7,12 +7,12 @@ from pubnub import Pubnub
 from models.lobby import Lobby
 from models.user import User
 
-PUBLISH_KEY = "pub-c-7fd0bf0a-96ef-42eb-8378-a52012ac326a"
-SUBSCRIBE_KEY = "sub-c-a5a6fc48-79cc-11e5-9720-0619f8945a4f"
-LOBBY_PREFIX = "routerunner-"
-GLOBAL_LOBBY = LOBBY_PREFIX + "global"
-CREATION_MSG = "Creating new lobby."
-START_GAME_MSG = "Game is about to begin."
+# PubNub will now be handled on client side
+# PUBLISH_KEY = "pub-c-7fd0bf0a-96ef-42eb-8378-a52012ac326a"
+# SUBSCRIBE_KEY = "sub-c-a5a6fc48-79cc-11e5-9720-0619f8945a4f"
+# LOBBY_PREFIX = "routerunner-"
+# GLOBAL_LOBBY = LOBBY_PREFIX + "global"
+REQ_USERS = 2   # Number of users needed to start a game
 
 
 class NewLobbyHandler(webapp2.RequestHandler):
@@ -22,11 +22,11 @@ class NewLobbyHandler(webapp2.RequestHandler):
         """ User creates a lobby.
         Request
             uid - user_id
-        Response
             lid - name of lobby
         """
         data = json.loads(self.request.body)
         uid = data['uid']
+        lobby_id = data['lid']
         user = User.query(User.uuid == uid).get()
         # New User
         if user is None:
@@ -36,12 +36,10 @@ class NewLobbyHandler(webapp2.RequestHandler):
             user.put()
         # TODO: Make sure this user is actually who we think it is
 
-        lobby_id = LOBBY_PREFIX + uid
         lobby = Lobby(lobby_id=lobby_id, users=[uid])
         lobby.put()
-        response = {'lid': lobby_id}
 
-        self.response.out.write(json.dumps(response))
+        self.response.out.set_status(200)
 
 
 class JoinLobbyHandler(webapp2.RequestHandler):
@@ -89,10 +87,30 @@ class StartGameHandler(webapp2.RequestHandler):
         Response
         """
         data = json.loads(self.request.body)
-        user_id = data['uid']
-        channel_id = data['lid']
+        uid = data['uid']
+        lobby_id = data['lid']
+        lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
 
-        # TODO: Add logic for creating Session
+        if lobby is None:
+            logging.error(
+                "User (" + str(uid) + ") attempted to join non-existent Lobby (" + str(lobby_id) + ").")
+        else:
+            ready = lobby.ready
+            # This is a new user who is ready
+            if uid not in ready:
+                lobby.ready.append(uid)
+                lobby.put()
+
+        response = {}
+        # The game is ready to be started
+        # Greater than for internal tool purposes
+        if len(lobby.ready) >= REQ_USERS:
+            # TODO: Add logic for creating a Session here
+            response['ready'] = "true"
+            self.response.out.write(json.dumps(response))
+        else:
+            response['ready'] = "false"
+            self.response.out.write(json.dumps(response))
 
 
 routes = [

@@ -8,6 +8,7 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
     self.lobbies = joinLobbyResource.get(function(resp) {
         self.lobbies = resp.lobbies;
     });
+    self.user = "";
 
     function randomString() {
         var text = "";
@@ -21,14 +22,12 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
 
     self.createLobby = function() {
         var user = randomString();
-        var request = {uid: user};
+        var request = {uid: user, lid: "routerunner-" + user};
 
         newLobbyResource.save(angular.toJson(request), function(success) {
-            self.success = success.data;
-            self.lobbyId = success.lid;
-            self.lobbies.push(self.lobbyId);
+            self.success = success;
         }, function(failure) {
-            self.error = failure.data;
+            self.error = failure;
         });
     };
 
@@ -36,9 +35,20 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
         var user = randomString();
         var request = {lid: lobby_id, uid: user};
         joinLobbyResource.save(angular.toJson(request), function(success) {
-            self.success = success.data;
+            self.success = success;
         }, function(failure) {
-            self.error = failure.data;
+            self.error = failure;
+        });
+    };
+
+    self.startGame = function(lobby_id) {
+        var request = {lid: lobby_id, uid: self.user};
+        startGameResource.save(angular.toJson(request), function(success) {
+            self.success = success;
+            self.ready = self.success.ready;
+            alert(self.ready);
+        }, function(failure) {
+            self.error = failure;
         });
     };
 });

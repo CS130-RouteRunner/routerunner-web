@@ -10,3 +10,6 @@ class Lobby(ndb.Model):
     lobby_id = ndb.StringProperty()
     # String list of user id's
     users = ndb.StringProperty(repeated=True, indexed=False)
+    # String list of users who are ready to play the game
+    ready = ndb.StringProperty(repeated=True, indexed=False)
+    created = ndb.DateTimeProperty(auto_now_add=True)

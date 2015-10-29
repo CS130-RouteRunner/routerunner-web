@@ -9,6 +9,7 @@ class User(ndb.Model):
     # Unique id for pubnub
     uuid = ndb.StringProperty()
     nickname = ndb.StringProperty()
+    created = ndb.DateTimeProperty(auto_now_add=True)
 
     # Statistics
     win = ndb.IntegerProperty(indexed=False)
