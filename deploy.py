@@ -11,16 +11,24 @@ MODULES = ['app.yaml']
 def get_parser():
     parser = argparse.ArgumentParser(
         description='Deploys to Google App Engine')
+    parser.add_argument('-V', '--version', default=None,
+                        help='set version to deploy')
     return parser
 
 
 def main():
-    return deploy()
+    parser = get_parser()
+    args = parser.parse_args()
+    return deploy(args)
 
 
-def deploy():
+def deploy(args):
     cmd = ['appcfg.py']
     cmd.extend(['-A', APPENGINE_NAME])
+    # Deploy to a version of the instance, e.g.
+    # version-dot-APPENGINE_NAME.appspot.com"
+    if args.version:
+        cmd += ['--version', args.version]
     update_cmd = cmd[:] + ['update'] + MODULES
     out = sys.stdout
     outerr = sys.stderr
