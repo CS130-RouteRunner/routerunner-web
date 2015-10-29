@@ -2,6 +2,7 @@
 
 # Format python files to be PEP8 compliant
 autopep8 --in-place --recursive .
+git add .
 
 # Run JSHint validation
 js_files=$(git diff --name-only --staged -- *.js **/*.js)
