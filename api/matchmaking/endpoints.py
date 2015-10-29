@@ -30,13 +30,13 @@ class NewLobbyHandler(webapp2.RequestHandler):
             uid = data['uid']
         except KeyError:
             self.error(400)
-            failure_msg = {'error': 'Missing uid (User id)'}
+            failure_msg = {'msg': 'Missing uid (User id)'}
             return self.response.out.write(json.dumps(failure_msg))
         try:
             lobby_id = data['lid']
         except KeyError:
             self.error(400)
-            failure_msg = {'error': 'Missing lid (Lobby id)'}
+            failure_msg = {'msg': 'Missing lid (Lobby id)'}
             return self.response.out.write(json.dumps(failure_msg))
 
         user = User.query(User.uuid == uid).get()
@@ -50,6 +50,9 @@ class NewLobbyHandler(webapp2.RequestHandler):
 
         lobby = Lobby(lobby_id=lobby_id, users=[uid])
         lobby.put()
+
+        success_msg = {'msg': 'Saved'}
+        self.response.out.write(json.dumps(success_msg))
 
 
 class JoinLobbyHandler(webapp2.RequestHandler):
@@ -78,7 +81,7 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             uid = data['uid']
         except KeyError:
             self.error(400)
-            failure_msg = {'error': 'Missing uid (User id)'}
+            failure_msg = {'msg': 'Missing uid (User id)'}
             return self.response.out.write(json.dumps(failure_msg))
 
         q = User.query(User.uuid == uid)
@@ -91,12 +94,15 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             lobby_id = data['lid']
         except KeyError:
             self.error(400)
-            failure_msg = {'error': 'Missing lid (Lobby id)'}
+            failure_msg = {'msg': 'Missing lid (Lobby id)'}
             return self.response.out.write(json.dumps(failure_msg))
 
         lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
         lobby.users.append(uid)
         lobby.put()
+
+        success_msg = {'msg': 'Saved'}
+        self.response.out.write(json.dumps(success_msg))
 
 
 class StartGameHandler(webapp2.RequestHandler):
@@ -115,14 +121,14 @@ class StartGameHandler(webapp2.RequestHandler):
             uid = data['uid']
         except KeyError:
             self.error(400)
-            failure_msg = {'error': 'Missing uid (User id)'}
+            failure_msg = {'msg': 'Missing uid (User id)'}
             return self.response.out.write(json.dumps(failure_msg))
 
         try:
             lobby_id = data['lid']
         except KeyError:
             self.error(400)
-            failure_msg = {'error': 'Missing lid (Lobby id)'}
+            failure_msg = {'msg': 'Missing lid (Lobby id)'}
             return self.response.out.write(json.dumps(failure_msg))
 
         lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
@@ -164,7 +170,7 @@ class EndGameHandler(webapp2.RequestHandler):
             lobby_id = data['lid']
         except KeyError:
             self.error(400)
-            failure_msg = {'error': 'Missing lid (Lobby id)'}
+            failure_msg = {'msg': 'Missing lid (Lobby id)'}
             return self.response.out.write(json.dumps(failure_msg))
 
         # try:
