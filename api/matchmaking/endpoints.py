@@ -149,8 +149,43 @@ class StartGameHandler(webapp2.RequestHandler):
             self.response.out.write(json.dumps(response))
 
 
+class EndGameHandler(webapp2.RequestHandler):
+    """Handler for ending a game."""
+
+    def post(self):
+        """ End game.
+        Request
+            lid - the game lobby to end
+            sessid - the game session to end
+        """
+        data = json.loads(self.request.body)
+
+        try:
+            lobby_id = data['lid']
+        except KeyError:
+            self.error(400)
+            failure_msg = {'error': 'Missing lid (Lobby id)'}
+            return self.response.out.write(json.dumps(failure_msg))
+
+        # try:
+        #     session_id = data['sessid']
+        # except KeyError:
+        #     self.error(400)
+        #     failure_msg = {'error': 'Missing sessid (Game Session id)'}
+        #     return self.response.out.write(json.dumps(failure_msg))
+
+        lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
+
+        # Lobby has not yet been deleted
+        if lobby:
+            lobby.key.delete()
+
+        # TODO: Session cleanup
+
+
 routes = [
     ('/api/matchmaking/new', NewLobbyHandler),
     ('/api/matchmaking/join', JoinLobbyHandler),
-    ('/api/matchmaking/start', StartGameHandler)
+    ('/api/matchmaking/start', StartGameHandler),
+    ('/api/matchmaking/end', EndGameHandler)
 ]

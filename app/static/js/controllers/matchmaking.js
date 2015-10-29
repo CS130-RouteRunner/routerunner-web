@@ -1,6 +1,7 @@
 'use strict';
 
-app.controller("matchmakingController", function(newLobbyResource, joinLobbyResource, startGameResource){
+app.controller("matchmakingController", function(newLobbyResource, joinLobbyResource, startGameResource,
+                                                 endGameResource){
     var self = this;
     self.message = "Matchmaking Controller";
     self.showLobby = false;
@@ -47,6 +48,15 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
             self.success = success;
             self.ready = self.success.ready;
             alert(self.ready);
+        }, function(failure) {
+            self.error = failure;
+        });
+    };
+
+    self.endGame = function(lobby_id) {
+        var request = {lid: lobby_id};
+        endGameResource.save(angular.toJson(request), function(success) {
+            self.success = success;
         }, function(failure) {
             self.error = failure;
         });
