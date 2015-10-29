@@ -25,8 +25,20 @@ class NewLobbyHandler(webapp2.RequestHandler):
             lid - name of lobby
         """
         data = json.loads(self.request.body)
-        uid = data['uid']
-        lobby_id = data['lid']
+
+        try:
+            uid = data['uid']
+        except KeyError:
+            self.error(400)
+            failure_msg = {'error': 'Missing uid (User id)'}
+            return self.response.out.write(json.dumps(failure_msg))
+        try:
+            lobby_id = data['lid']
+        except KeyError:
+            self.error(400)
+            failure_msg = {'error': 'Missing lid (Lobby id)'}
+            return self.response.out.write(json.dumps(failure_msg))
+
         user = User.query(User.uuid == uid).get()
         # New User
         if user is None:
@@ -38,8 +50,6 @@ class NewLobbyHandler(webapp2.RequestHandler):
 
         lobby = Lobby(lobby_id=lobby_id, users=[uid])
         lobby.put()
-
-        self.response.out.set_status(200)
 
 
 class JoinLobbyHandler(webapp2.RequestHandler):
@@ -63,13 +73,26 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             lid - lobby to join
         """
         data = json.loads(self.request.body)
-        uid = data['uid']
+
+        try:
+            uid = data['uid']
+        except KeyError:
+            self.error(400)
+            failure_msg = {'error': 'Missing uid (User id)'}
+            return self.response.out.write(json.dumps(failure_msg))
+
         q = User.query(User.uuid == uid)
         if q is None:
             logging.error("Non-existent user (" + str(uid) +
                           ") attempted to join lobby.")
         # TODO: Make sure this user is actually who we think it is
-        lobby_id = data['lid']
+
+        try:
+            lobby_id = data['lid']
+        except KeyError:
+            self.error(400)
+            failure_msg = {'error': 'Missing lid (Lobby id)'}
+            return self.response.out.write(json.dumps(failure_msg))
 
         lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
         lobby.users.append(uid)
@@ -87,8 +110,21 @@ class StartGameHandler(webapp2.RequestHandler):
         Response
         """
         data = json.loads(self.request.body)
-        uid = data['uid']
-        lobby_id = data['lid']
+
+        try:
+            uid = data['uid']
+        except KeyError:
+            self.error(400)
+            failure_msg = {'error': 'Missing uid (User id)'}
+            return self.response.out.write(json.dumps(failure_msg))
+
+        try:
+            lobby_id = data['lid']
+        except KeyError:
+            self.error(400)
+            failure_msg = {'error': 'Missing lid (Lobby id)'}
+            return self.response.out.write(json.dumps(failure_msg))
+
         lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
 
         if lobby is None:
