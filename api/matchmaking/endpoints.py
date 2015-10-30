@@ -6,6 +6,7 @@ import logging
 from pubnub import Pubnub
 from models.lobby import Lobby
 from models.user import User
+from models.session import Session
 
 # PubNub will now be handled on client side
 # PUBLISH_KEY = "pub-c-7fd0bf0a-96ef-42eb-8378-a52012ac326a"
@@ -106,6 +107,11 @@ class StartGameHandler(webapp2.RequestHandler):
         # Greater than for internal tool purposes
         if len(lobby.ready) >= REQ_USERS:
             # TODO: Add logic for creating a Session here
+            session = Session(channel_id=lobby_id, target_gold_amount="100",
+                              user_ids=[])
+            for i in range(len(lobby.ready)):
+                session.user_ids.append(lobby.ready[i])
+            session.put()
             response['ready'] = "true"
             self.response.out.write(json.dumps(response))
         else:

@@ -8,6 +8,7 @@ import webapp2
 
 from api import map
 from api import matchmaking
+from api import communication
 
 
 class MainHandler(webapp2.RequestHandler):
@@ -21,5 +22,6 @@ routes = [
 
 routes += map.routes
 routes += matchmaking.routes
+routes += communication.routes
 
 app = webapp2.WSGIApplication(routes, debug=True)

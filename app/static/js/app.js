@@ -34,7 +34,8 @@ app.controller("mainController", function($http) {
     self.endpoints = [
         "/api/matchmaking/new",
         "/api/matchmaking/join",
-        "/api/matchmaking/start"
+        "/api/matchmaking/start",
+        "/api/matchmaking/init"
     ];
 
 });

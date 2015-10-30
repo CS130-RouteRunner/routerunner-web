@@ -11,4 +11,6 @@ app.factory('mapResource', function($resource){
     return $resource(MATCHMAKING_BASE_URL + 'join');
 }).factory('startGameResource', function($resource){
     return $resource(MATCHMAKING_BASE_URL + 'start');
+}).factory('initGameResource', function($resource){
+    return $resource(MATCHMAKING_BASE_URL + 'init');
 });
