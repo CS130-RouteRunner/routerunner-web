@@ -50,7 +50,10 @@ class NewLobbyHandler(webapp2.RequestHandler):
         # TODO: Make sure this user is actually who we think it is
 
         lobby = Lobby(lobby_id=lobby_id, users=[uid])
-        lobby.put()
+        # Check if this lobby already exists
+        exists = Lobby.query(Lobby.lobby_id == lobby_id).get()
+        if exists is None:
+            lobby.put()
 
         success_msg = {'msg': 'Saved'}
         self.response.out.write(json.dumps(success_msg))
@@ -99,6 +102,12 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             return self.response.out.write(json.dumps(failure_msg))
 
         lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
+        # Stale lobby
+        if lobby is None:
+            self.error(400)
+            failure_msg = {'msg': 'Lobby does not exist!'}
+            return self.response.out.write(json.dumps(failure_msg))
+
         lobby.users.append(uid)
         lobby.put()
 
