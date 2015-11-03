@@ -8,12 +8,16 @@ from models.lobby import Lobby
 from models.user import User
 from models.session import Session
 
-# PubNub will now be handled on client side
-# PUBLISH_KEY = "pub-c-7fd0bf0a-96ef-42eb-8378-a52012ac326a"
-# SUBSCRIBE_KEY = "sub-c-a5a6fc48-79cc-11e5-9720-0619f8945a4f"
-# LOBBY_PREFIX = "routerunner-"
-# GLOBAL_LOBBY = LOBBY_PREFIX + "global"
+PUBLISH_KEY = "pub-c-7fd0bf0a-96ef-42eb-8378-a52012ac326a"
+SUBSCRIBE_KEY = "sub-c-a5a6fc48-79cc-11e5-9720-0619f8945a4f"
 REQ_USERS = 2   # Number of users needed to start a game
+
+pubnub = Pubnub(publish_key=PUBLISH_KEY,
+                subscribe_key=SUBSCRIBE_KEY, ssl_on=False, uuid="admin")
+
+
+def callback(message, channel):
+    print "Channel %s: (%s)" % (channel, message)
 
 
 class NewLobbyHandler(webapp2.RequestHandler):
@@ -26,19 +30,22 @@ class NewLobbyHandler(webapp2.RequestHandler):
             lid - name of lobby
         """
         data = json.loads(self.request.body)
+        response = {}
 
         try:
             uid = data['uid']
         except KeyError:
             self.error(400)
-            failure_msg = {'msg': 'Missing uid (User id)'}
-            return self.response.out.write(json.dumps(failure_msg))
+            response['status'] = 'error'
+            response['msg'] = 'Missing uid (User id)'
+            return self.response.out.write(json.dumps(response))
         try:
             lobby_id = data['lid']
         except KeyError:
             self.error(400)
-            failure_msg = {'msg': 'Missing lid (Lobby id)'}
-            return self.response.out.write(json.dumps(failure_msg))
+            response['status'] = 'error'
+            response['msg'] = 'Missing lid (Lobby id)'
+            return self.response.out.write(json.dumps(response))
 
         user = User.query(User.uuid == uid).get()
         # New User
@@ -55,8 +62,8 @@ class NewLobbyHandler(webapp2.RequestHandler):
         if exists is None:
             lobby.put()
 
-        success_msg = {'msg': 'Saved'}
-        self.response.out.write(json.dumps(success_msg))
+        response['status'] = 'success'
+        self.response.out.write(json.dumps(response))
 
 
 class JoinLobbyHandler(webapp2.RequestHandler):
@@ -69,7 +76,7 @@ class JoinLobbyHandler(webapp2.RequestHandler):
         """
         q = Lobby.query()
         lobbies = [lobby.lobby_id for lobby in q.iter()]
-        response = {'lobbies': lobbies}
+        response = {'status': 'success', 'data': {'lobbies': lobbies}}
 
         self.response.out.write(json.dumps(response))
 
@@ -80,13 +87,15 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             lid - lobby to join
         """
         data = json.loads(self.request.body)
+        response = {}
 
         try:
             uid = data['uid']
         except KeyError:
             self.error(400)
-            failure_msg = {'msg': 'Missing uid (User id)'}
-            return self.response.out.write(json.dumps(failure_msg))
+            response['status'] = 'error'
+            response['msg'] = 'Missing uid (User id)'
+            return self.response.out.write(json.dumps(response))
 
         q = User.query(User.uuid == uid)
         if q is None:
@@ -98,27 +107,30 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             lobby_id = data['lid']
         except KeyError:
             self.error(400)
-            failure_msg = {'msg': 'Missing lid (Lobby id)'}
-            return self.response.out.write(json.dumps(failure_msg))
+            response['status'] = 'error'
+            response['msg'] = 'Missing lid (Lobby id)'
+            return self.response.out.write(json.dumps(response))
 
         lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
         # Stale lobby
         if lobby is None:
             self.error(400)
-            failure_msg = {'msg': 'Lobby does not exist!'}
-            return self.response.out.write(json.dumps(failure_msg))
+            response['status'] = 'error'
+            response['msg'] = "Lobby " + lobby_id + " does not exist!"
+            return self.response.out.write(json.dumps(response))
 
         # Lobby already has REQ_USERS in it
         if len(lobby.users) == REQ_USERS:
             self.error(400)
-            failure_msg = {'msg': 'Lobby at max capacity!'}
-            return self.response.out.write(json.dumps(failure_msg))
+            response['status'] = 'error'
+            response['msg'] = "Lobby " + lobby_id + " is at max capacity!"
+            return self.response.out.write(json.dumps(response))
 
         lobby.users.append(uid)
         lobby.put()
 
-        success_msg = {'msg': 'Saved'}
-        self.response.out.write(json.dumps(success_msg))
+        response['status'] = 'success'
+        self.response.out.write(json.dumps(response))
 
 
 class StartGameHandler(webapp2.RequestHandler):
@@ -132,20 +144,23 @@ class StartGameHandler(webapp2.RequestHandler):
         Response
         """
         data = json.loads(self.request.body)
+        response = {}
 
         try:
             uid = data['uid']
         except KeyError:
             self.error(400)
-            failure_msg = {'msg': 'Missing uid (User id)'}
-            return self.response.out.write(json.dumps(failure_msg))
+            response['status'] = 'error'
+            response['msg'] = 'Missing uid (User id)'
+            return self.response.out.write(json.dumps(response))
 
         try:
             lobby_id = data['lid']
         except KeyError:
             self.error(400)
-            failure_msg = {'msg': 'Missing lid (Lobby id)'}
-            return self.response.out.write(json.dumps(failure_msg))
+            response['status'] = 'error'
+            response['msg'] = 'Missing lid (Lobby id)'
+            return self.response.out.write(json.dumps(response))
 
         lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
 
@@ -161,18 +176,26 @@ class StartGameHandler(webapp2.RequestHandler):
 
         response = {}
         # The game is ready to be started
-        # Greater than for internal tool purposes
-        if len(lobby.ready) >= REQ_USERS:
+        if len(lobby.ready) == REQ_USERS:
             # TODO: Add logic for creating a Session here
-            session = Session(channel_id=lobby_id, target_gold_amount="100",
+	    session = Session(channel_id=lobby_id, target_gold_amount="100",
                               user_ids=[])
             for i in range(len(lobby.ready)):
                 session.user_ids.append(lobby.ready[i])
-            session.put()
-            response['ready'] = "true"
+            session.put()            
+	    response['type'] = "info"
+            response['data'] = {"ready": "true"}
+            pubnub.subscribe(lobby_id, callback)
+            pubnub.publish(lobby_id, response)
+            pubnub.unsubscribe(lobby_id)
+
             self.response.out.write(json.dumps(response))
         else:
-            response['ready'] = "false"
+            response['type'] = "info"
+            response['data'] = {"ready": "false"}
+            pubnub.subscribe(lobby_id, callback)
+            pubnub.publish(lobby_id, callback)
+            pubnub.unsubscribe(lobby_id)
             self.response.out.write(json.dumps(response))
 
 
@@ -182,17 +205,28 @@ class EndGameHandler(webapp2.RequestHandler):
     def post(self):
         """ End game.
         Request
+            uid - user id of user leaving
             lid - the game lobby to end
             sessid - the game session to end
         """
         data = json.loads(self.request.body)
+        response = {}
+
+        try:
+            user_id = data['uid']
+        except KeyError:
+            self.error(400)
+            response['status'] = 'error'
+            response['msg'] = 'Missing uid (User id)'
+            return self.response.out.write(json.dumps(response))
 
         try:
             lobby_id = data['lid']
         except KeyError:
             self.error(400)
-            failure_msg = {'msg': 'Missing lid (Lobby id)'}
-            return self.response.out.write(json.dumps(failure_msg))
+            response['status'] = 'error'
+            response['msg'] = 'Missing lid (Lobby id)'
+            return self.response.out.write(json.dumps(response))
 
         # try:
         #     session_id = data['sessid']
@@ -205,9 +239,18 @@ class EndGameHandler(webapp2.RequestHandler):
 
         # Lobby has not yet been deleted
         if lobby:
-            lobby.key.delete()
+            # If there is only 1 user left, just delete lobby
+            if len(lobby.users) == 1:
+                lobby.key.delete()
+            # Otherwise, remove the user from lobby
+            else:
+                lobby.users.remove(user_id)
+                lobby.put()
 
         # TODO: Session cleanup
+
+        response['status'] = 'success'
+        self.response.out.write(json.dumps(response))
 
 
 routes = [
