@@ -108,6 +108,12 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             failure_msg = {'msg': 'Lobby does not exist!'}
             return self.response.out.write(json.dumps(failure_msg))
 
+        # Lobby already has REQ_USERS in it
+        if len(lobby.users) == REQ_USERS:
+            self.error(400)
+            failure_msg = {'msg': 'Lobby at max capacity!'}
+            return self.response.out.write(json.dumps(failure_msg))
+
         lobby.users.append(uid)
         lobby.put()
 
