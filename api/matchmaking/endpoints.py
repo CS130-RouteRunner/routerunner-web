@@ -178,12 +178,12 @@ class StartGameHandler(webapp2.RequestHandler):
         # The game is ready to be started
         if len(lobby.ready) == REQ_USERS:
             # TODO: Add logic for creating a Session here
-	    session = Session(channel_id=lobby_id, target_gold_amount="100",
+            session = Session(channel_id=lobby_id, target_gold_amount="100",
                               user_ids=[])
             for i in range(len(lobby.ready)):
                 session.user_ids.append(lobby.ready[i])
-            session.put()            
-	    response['type'] = "info"
+            session.put()
+            response['type'] = "info"
             response['data'] = {"ready": "true"}
             pubnub.subscribe(lobby_id, callback)
             pubnub.publish(lobby_id, response)
