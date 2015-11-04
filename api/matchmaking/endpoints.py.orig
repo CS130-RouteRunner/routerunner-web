@@ -6,7 +6,10 @@ import logging
 from pubnub import Pubnub
 from models.lobby import Lobby
 from models.user import User
+<<<<<<< HEAD
+=======
 from models.session import Session
+>>>>>>> communications
 
 # PubNub will now be handled on client side
 # PUBLISH_KEY = "pub-c-7fd0bf0a-96ef-42eb-8378-a52012ac326a"
@@ -15,6 +18,7 @@ from models.session import Session
 # GLOBAL_LOBBY = LOBBY_PREFIX + "global"
 REQ_USERS = 2   # Number of users needed to start a game
 
+<<<<<<< HEAD
 
 class NewLobbyHandler(webapp2.RequestHandler):
     """Handler for creating a new game lobby."""
@@ -51,11 +55,42 @@ class NewLobbyHandler(webapp2.RequestHandler):
 
         lobby = Lobby(lobby_id=lobby_id, users=[uid])
         lobby.put()
+=======
+
+class NewLobbyHandler(webapp2.RequestHandler):
+    """Handler for creating a new game lobby."""
+
+    def post(self):
+        """ User creates a lobby.
+        Request
+            uid - user_id
+            lid - name of lobby
+        """
+        data = json.loads(self.request.body)
+        uid = data['uid']
+        lobby_id = data['lid']
+        user = User.query(User.uuid == uid).get()
+        # New User
+        if user is None:
+            logging.info("New user (" + str(uid) +
+                         ") has joined Route Runner.")
+            user = User(uuid=uid, nickname=uid)
+            user.put()
+        # TODO: Make sure this user is actually who we think it is
+
+        lobby = Lobby(lobby_id=lobby_id, users=[uid])
+        lobby.put()
+
+        self.response.out.set_status(200)
+>>>>>>> communications
 
         success_msg = {'msg': 'Saved'}
         self.response.out.write(json.dumps(success_msg))
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> communications
 class JoinLobbyHandler(webapp2.RequestHandler):
     """Handler for joining an existing game lobby."""
 
@@ -77,6 +112,7 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             lid - lobby to join
         """
         data = json.loads(self.request.body)
+<<<<<<< HEAD
 
         try:
             uid = data['uid']
@@ -85,11 +121,15 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             failure_msg = {'msg': 'Missing uid (User id)'}
             return self.response.out.write(json.dumps(failure_msg))
 
+=======
+        uid = data['uid']
+>>>>>>> communications
         q = User.query(User.uuid == uid)
         if q is None:
             logging.error("Non-existent user (" + str(uid) +
                           ") attempted to join lobby.")
         # TODO: Make sure this user is actually who we think it is
+<<<<<<< HEAD
 
         try:
             lobby_id = data['lid']
@@ -97,14 +137,20 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             self.error(400)
             failure_msg = {'msg': 'Missing lid (Lobby id)'}
             return self.response.out.write(json.dumps(failure_msg))
+=======
+        lobby_id = data['lid']
+>>>>>>> communications
 
         lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
         lobby.users.append(uid)
         lobby.put()
 
+<<<<<<< HEAD
         success_msg = {'msg': 'Saved'}
         self.response.out.write(json.dumps(success_msg))
 
+=======
+>>>>>>> communications
 
 class StartGameHandler(webapp2.RequestHandler):
     """Handler for starting a game."""
@@ -117,6 +163,7 @@ class StartGameHandler(webapp2.RequestHandler):
         Response
         """
         data = json.loads(self.request.body)
+<<<<<<< HEAD
 
         try:
             uid = data['uid']
@@ -132,6 +179,10 @@ class StartGameHandler(webapp2.RequestHandler):
             failure_msg = {'msg': 'Missing lid (Lobby id)'}
             return self.response.out.write(json.dumps(failure_msg))
 
+=======
+        uid = data['uid']
+        lobby_id = data['lid']
+>>>>>>> communications
         lobby = Lobby.query(Lobby.lobby_id == lobby_id).get()
 
         if lobby is None:
@@ -149,16 +200,20 @@ class StartGameHandler(webapp2.RequestHandler):
         # Greater than for internal tool purposes
         if len(lobby.ready) >= REQ_USERS:
             # TODO: Add logic for creating a Session here
+<<<<<<< HEAD
+=======
             session = Session(channel_id=lobby_id, target_gold_amount="100",
                               user_ids=[])
             for i in range(len(lobby.ready)):
                 session.user_ids.append(lobby.ready[i])
             session.put()
+>>>>>>> communications
             response['ready'] = "true"
             self.response.out.write(json.dumps(response))
         else:
             response['ready'] = "false"
             self.response.out.write(json.dumps(response))
+<<<<<<< HEAD
 
 
 class EndGameHandler(webapp2.RequestHandler):
@@ -193,11 +248,17 @@ class EndGameHandler(webapp2.RequestHandler):
             lobby.key.delete()
 
         # TODO: Session cleanup
+=======
+>>>>>>> communications
 
 
 routes = [
     ('/api/matchmaking/new', NewLobbyHandler),
     ('/api/matchmaking/join', JoinLobbyHandler),
+<<<<<<< HEAD
     ('/api/matchmaking/start', StartGameHandler),
     ('/api/matchmaking/end', EndGameHandler)
+=======
+    ('/api/matchmaking/start', StartGameHandler)
+>>>>>>> communications
 ]

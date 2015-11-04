@@ -6,11 +6,14 @@
     <a data-ng-click="matchmakingCon.endGame(lobby)">End Game</a></li>
 </ul>
 
+<<<<<<< HEAD
+=======
 <form data-ng-submit="matchmakingCon.initGame(lobby, form_data)">
     <input type="text" data-ng-model="form_data.info">
     <input type="submit" id="submit" value="Add Your Route">
 </form>
 
+>>>>>>> communications
 <button data-ng-click="matchmakingCon.createLobby()">Create Lobby</button>
 
 <input type="text" name="input" placeholder="Enter username to start game"
