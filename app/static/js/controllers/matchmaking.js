@@ -6,7 +6,7 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
     self.showLobby = false;
     self.messages = [];
     self.lobbies = joinLobbyResource.get(function(resp) {
-        self.lobbies = resp.lobbies;
+        self.lobbies = resp.data.lobbies;
     });
     self.user = "";
 
@@ -41,6 +41,13 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
         });
     };
 
+    self.fetchLobbies = function() {
+        self.lobbies = joinLobbyResource.get(function(resp) {
+            self.lobbies = resp.lobbies;
+        });
+
+    };
+
     self.startGame = function(lobby_id) {
         var request = {lid: lobby_id, uid: self.user};
         startGameResource.save(angular.toJson(request), function(success) {
@@ -61,7 +68,7 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
         });
     };
 
-    self.initGame = function(lobby_id, route_data)
+    /*self.initGame = function(lobby_id, route_data)
         var request = {uid: self.user cid: lobby_id, current_gold: '100', route: route_data.info}
         initGameResource.save(angular.toJson(request), function(success) {
             self.success = success.data;
@@ -70,5 +77,5 @@ app.controller("matchmakingController", function(newLobbyResource, joinLobbyReso
             self.messages.push("Your route is " + self.route);
         }, function(failure) {
             self.error = failure.data;
-        });
+        });*/
 });

@@ -74,7 +74,7 @@ class JoinLobbyHandler(webapp2.RequestHandler):
         Response
             lobbies - list of lobbies
         """
-        q = Lobby.query()
+        q = Lobby.query(Lobby.started == False)
         lobbies = [lobby.lobby_id for lobby in q.iter()]
         response = {'status': 'success', 'data': {'lobbies': lobbies}}
 
@@ -120,13 +120,14 @@ class JoinLobbyHandler(webapp2.RequestHandler):
             return self.response.out.write(json.dumps(response))
 
         # Lobby already has REQ_USERS in it
-        if len(lobby.users) == REQ_USERS:
+        if len(lobby.users) == REQ_USERS or lobby.started is True:
             self.error(400)
             response['status'] = 'error'
             response['msg'] = "Lobby " + lobby_id + " is at max capacity!"
             return self.response.out.write(json.dumps(response))
 
         lobby.users.append(uid)
+        lobby.started = True
         lobby.put()
 
         response['status'] = 'success'

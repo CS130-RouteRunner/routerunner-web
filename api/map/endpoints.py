@@ -2,8 +2,6 @@ import json
 import webapp2
 from google.appengine.api import urlfetch
 
-from models.song import Song
-
 MAPBOX_DIRECTION_API = "https://api.mapbox.com/v4/directions/"
 MAPBOX_ACCESS_TOKEN = "pk.eyJ1IjoicmNoZW45MyIsImEiOiJjaWcyeDZ1NzExZ3FidGxreHpiNG5neTV5In0.0ZjmL0S4tNln-Op6vQzuRQ"
 MAPBOX_PROFILE = "mapbox.driving/"

@@ -13,3 +13,4 @@ class Lobby(ndb.Model):
     # String list of users who are ready to play the game
     ready = ndb.StringProperty(repeated=True, indexed=False)
     created = ndb.DateTimeProperty(auto_now_add=True)
+    started = ndb.BooleanProperty(default=False)
