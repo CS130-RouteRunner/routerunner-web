@@ -2,7 +2,7 @@
 
 # http://blog.ittybittyapps.com/blog/2013/09/03/git-pre-push/
 
-cmd="nosetests tests"
+cmd="nosetests tests --with-gae --logging-level=ERROR"
 master_branch='master'
 curr_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
 
