@@ -129,11 +129,15 @@ class MatchmakingTest(unittest.TestCase):
         lid = 'cs130'
         request = {'uid': uid, 'lid': lid}
         user = User.query(User.uuid == uid).get()
+        lobby = Lobby.query(Lobby.lobby_id == lid).get()
         self.assertIsNone(user)
+        self.assertIsNone(lobby)
 
         response = self.testapp.post_json(endpoint, request)
         body = json.loads(response.body)
         self.assertEqual(response.status_int, 200)
         self.assertEqual(body['status'], 'success')
         user = User.query(User.uuid == uid).get()
+        lobby = Lobby.query(Lobby.lobby_id == lid).get()
         self.assertIsNotNone(user)
+        self.assertIsNotNone(lobby)
