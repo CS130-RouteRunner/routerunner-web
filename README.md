@@ -10,6 +10,9 @@ https://cloud.google.com/appengine/downloads?hl=en_US&&_ga=1.155433339.191772721
   1. Authenticate with your account I invited —> Should say authentication flow is complete
   2. Server will be available at route-runner-130.appspot.com
 
+## Testing
+1. Run `nosetests tests --with-gae --logging-level=ERROR` in the root directory of repository
+
 ## API Documentation
 [API](http://docs.routerunner.apiary.io/)
 
