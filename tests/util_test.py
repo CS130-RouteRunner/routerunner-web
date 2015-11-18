@@ -18,6 +18,16 @@ def create_lobbies(lid_list, started=False):
     ndb.put_multi(lobby_list)
 
 
+def fill_lobbies(lid_list):
+    """Populates lobbies."""
+    to_update = []
+    for lid in lid_list:
+        lobby = Lobby.query(Lobby.lobby_id == lid).get()
+        lobby.users = ["route", "runner"]
+        to_update.append(lobby)
+    ndb.put_multi(to_update)
+
+
 def create_user(uid):
     """Creates a user."""
     user = User(uuid=uid, nickname=uid)

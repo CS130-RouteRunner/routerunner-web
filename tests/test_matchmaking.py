@@ -4,9 +4,12 @@ import webtest
 import json
 from google.appengine.ext import ndb
 from google.appengine.ext import testbed
-from api import matchmaking
-import util_test
 import collections
+
+import util_test
+from api import matchmaking
+from models.user import User
+from models.lobby import Lobby
 
 
 class MatchmakingTest(unittest.TestCase):
@@ -36,6 +39,8 @@ class MatchmakingTest(unittest.TestCase):
         self.started = ["grace", "neerav"]
         util_test.create_lobbies(self.lobby_names)
         util_test.create_lobbies(self.started, True)
+        self.full = ["kailin"]
+        util_test.fill_lobbies(self.full)
 
     def tearDown(self):
         """Tear down test fixtures."""
@@ -52,19 +57,83 @@ class MatchmakingTest(unittest.TestCase):
         self.assertEqual(collections.Counter(response_lobbies),
                          collections.Counter(self.lobby_names))
 
-    def testNewLobbyHandler(self):
-        """Tests lobby creation handler."""
-        endpoint = '/api/matchmaking/new'
+    def testJoinLobbyPostHandler(self):
+        """Tests lobby joining handler."""
+        endpoint = '/api/matchmaking/join'
 
+        # No user id supplied
         response = self.testapp.post_json(endpoint, {}, expect_errors=True)
         body = json.loads(response.body)
         self.assertEqual(response.status_int, 400)
         self.assertEqual(body['status'], 'error')
         self.assertEqual(body['msg'], 'Missing uid (User id)')
 
+        # No lobby id supplied
         response = self.testapp.post_json(
             endpoint, {'uid': 'cs130'}, expect_errors=True)
         body = json.loads(response.body)
         self.assertEqual(response.status_int, 400)
         self.assertEqual(body['status'], 'error')
         self.assertEqual(body['msg'], 'Missing lid (Lobby id)')
+
+        # Lobby does not exist anymore
+        response = self.testapp.post_json(
+            endpoint, {'uid': 'cs130', 'lid': 'routerunner'}, expect_errors=True)
+        body = json.loads(response.body)
+        self.assertEqual(response.status_int, 400)
+        self.assertEqual(body['status'], 'error')
+        self.assertEqual(body['msg'], 'Lobby routerunner does not exist!')
+
+        # Lobby is full
+        request = {'uid': 'cs130', 'lid': self.full[0]}
+        response = self.testapp.post_json(
+            endpoint, request, expect_errors=True)
+        body = json.loads(response.body)
+        self.assertEqual(response.status_int, 400)
+        self.assertEqual(body['status'], 'error')
+        self.assertEqual(body['msg'], 'Lobby ' +
+                         self.full[0] + ' is at max capacity!')
+
+        # Successfully joined lobby
+        request = {'uid': 'cs130', 'lid': 'rchen93'}
+        response = self.testapp.post_json(endpoint, request)
+        body = json.loads(response.body)
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(body['status'], 'success')
+        lobby = Lobby.query(Lobby.lobby_id == 'rchen93').get()
+        self.assertEqual(len(lobby.users), 2)
+        self.assertEqual(collections.Counter(lobby.users),
+                         collections.Counter(['rchen93', 'cs130']))
+
+    def testNewLobbyHandler(self):
+        """Tests lobby creation handler."""
+        endpoint = '/api/matchmaking/new'
+
+        # No user id supplied
+        response = self.testapp.post_json(endpoint, {}, expect_errors=True)
+        body = json.loads(response.body)
+        self.assertEqual(response.status_int, 400)
+        self.assertEqual(body['status'], 'error')
+        self.assertEqual(body['msg'], 'Missing uid (User id)')
+
+        # No lobby id supplied
+        response = self.testapp.post_json(
+            endpoint, {'uid': 'cs130'}, expect_errors=True)
+        body = json.loads(response.body)
+        self.assertEqual(response.status_int, 400)
+        self.assertEqual(body['status'], 'error')
+        self.assertEqual(body['msg'], 'Missing lid (Lobby id)')
+
+        # Test that a new User is created if we've never seen this user before
+        uid = 'routerunner'
+        lid = 'cs130'
+        request = {'uid': uid, 'lid': lid}
+        user = User.query(User.uuid == uid).get()
+        self.assertIsNone(user)
+
+        response = self.testapp.post_json(endpoint, request)
+        body = json.loads(response.body)
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(body['status'], 'success')
+        user = User.query(User.uuid == uid).get()
+        self.assertIsNotNone(user)
