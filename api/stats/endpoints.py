@@ -25,5 +25,5 @@ class UserStatsHandler(webapp2.RequestHandler):
 
 
 routes = [
-    ('/api/stats/user/<user_id:\d+>', UserStatsHandler)
+    ('/api/stats/user/<user_id:\w+>', UserStatsHandler)
 ]
