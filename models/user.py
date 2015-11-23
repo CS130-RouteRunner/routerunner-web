@@ -12,7 +12,7 @@ class User(ndb.Model):
     created = ndb.DateTimeProperty(auto_now_add=True)
 
     # Statistics
-    win = ndb.IntegerProperty(indexed=False)
-    loss = ndb.IntegerProperty(indexed=False)
+    win = ndb.IntegerProperty(indexed=False, default=0)
+    loss = ndb.IntegerProperty(indexed=False, default=0)
     # Average game length in minutes
     avg_game_duration = ndb.IntegerProperty(indexed=False)

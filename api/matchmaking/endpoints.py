@@ -8,6 +8,8 @@ from models.lobby import Lobby
 from models.user import User
 from models.session import Session
 
+from google.appengine.ext import ndb
+
 PUBLISH_KEY = "pub-c-7fd0bf0a-96ef-42eb-8378-a52012ac326a"
 SUBSCRIBE_KEY = "sub-c-a5a6fc48-79cc-11e5-9720-0619f8945a4f"
 REQ_USERS = 2   # Number of users needed to start a game
@@ -18,6 +20,16 @@ pubnub = Pubnub(publish_key=PUBLISH_KEY,
 
 def callback(message, channel):
     print "Channel %s: (%s)" % (channel, message)
+
+
+@ndb.transactional(xg=True, retries=3)
+def update_users(winner, loser):
+    """Updates the winner and loser's win-loss statistics."""
+    winner = User.query(User.uuid == winner).get()
+    winner.win += 1
+    loser = User.query(User.uuid == loser).get()
+    loser.lose += 1
+    ndb.put_multi([winner, loser])
 
 
 class NewLobbyHandler(webapp2.RequestHandler):
@@ -209,6 +221,8 @@ class EndGameHandler(webapp2.RequestHandler):
             uid - user id of user leaving
             lid - the game lobby to end
             sessid - the game session to end
+            winner - user id of the winner
+            loser - user id of the loser
         """
         data = json.loads(self.request.body)
         response = {}
@@ -229,6 +243,16 @@ class EndGameHandler(webapp2.RequestHandler):
             response['msg'] = 'Missing lid (Lobby id)'
             return self.response.out.write(json.dumps(response))
 
+        try:
+            winner = data['winner']
+            loser = data['loser']
+        except KeyError:
+            self.error(400)
+            response['status'] = 'error'
+            response[
+                'msg'] = 'Missing winner (id of winner) or loser (id of loser)'
+            return self.response.out.write(json.dumps(response))
+
         # try:
         #     session_id = data['sessid']
         # except KeyError:
@@ -244,9 +268,11 @@ class EndGameHandler(webapp2.RequestHandler):
             if len(lobby.users) == 1:
                 lobby.key.delete()
             # Otherwise, remove the user from lobby
+            # Update both user's statistics
             else:
                 lobby.users.remove(user_id)
                 lobby.put()
+                update_users(winner, loser)
 
         # TODO: Session cleanup
 
