@@ -10,7 +10,7 @@ class UserStatsHandler(webapp2.RequestHandler):
     """Handler for player statistics."""
 
     def get(self, user_id):
-
+        logging.info("User id" + user_id)
         user = User.query(User.uuid == user_id).get()
         response = {}
 
@@ -25,5 +25,5 @@ class UserStatsHandler(webapp2.RequestHandler):
 
 
 routes = [
-    ('/api/stats/user/<user_id:\w+>', UserStatsHandler)
+    ('/api/stats/user/(\w+)', UserStatsHandler)
 ]
