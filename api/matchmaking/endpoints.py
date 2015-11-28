@@ -32,6 +32,30 @@ def update_users(winner, loser):
     ndb.put_multi([winner, loser])
 
 
+class NewUserHandler(webapp2.RequestHandler):
+    """Handler for creating a new user."""
+
+    def post(self):
+        """ Store new user in database.
+        Request
+            uid - user_id
+        """
+        data = json.loads(self.request.body)
+        response = {}
+
+        try:
+            uid = data['uid']
+        except KeyError:
+            self.error(400)
+            response['status'] = 'error'
+            response['msg'] = 'Missing uid (User id)'
+            return self.response.out.write(json.dumps(response))
+
+        logging.info("New user (" + str(uid) + ") has joined RouteRunner.")
+        user = User(uuid=uid, nickname=uid)
+        user.put()
+
+
 class NewLobbyHandler(webapp2.RequestHandler):
     """Handler for creating a new game lobby."""
 
@@ -63,7 +87,7 @@ class NewLobbyHandler(webapp2.RequestHandler):
         # New User
         if user is None:
             logging.info("New user (" + str(uid) +
-                         ") has joined Route Runner.")
+                         ") has joined RouteRunner.")
             user = User(uuid=uid, nickname=uid)
             user.put()
         # TODO: Make sure this user is actually who we think it is
@@ -281,6 +305,7 @@ class EndGameHandler(webapp2.RequestHandler):
 
 
 routes = [
+    ('/api/user/new', NewUserHandler),
     ('/api/matchmaking/new', NewLobbyHandler),
     ('/api/matchmaking/join', JoinLobbyHandler),
     ('/api/matchmaking/start', StartGameHandler),
