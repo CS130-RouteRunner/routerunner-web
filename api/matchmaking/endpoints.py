@@ -25,9 +25,7 @@ def callback(message, channel):
 @ndb.transactional(xg=True, retries=3)
 def update_users(winner, loser):
     """Updates the winner and loser's win-loss statistics."""
-    winner = User.query(User.uuid == winner).get()
     winner.win += 1
-    loser = User.query(User.uuid == loser).get()
     loser.lose += 1
     ndb.put_multi([winner, loser])
 
@@ -252,6 +250,8 @@ class EndGameHandler(webapp2.RequestHandler):
         """
         data = json.loads(self.request.body)
         response = {}
+        winner = None
+        loser = None
 
         try:
             user_id = data['uid']
@@ -269,15 +269,20 @@ class EndGameHandler(webapp2.RequestHandler):
             response['msg'] = 'Missing lid (Lobby id)'
             return self.response.out.write(json.dumps(response))
 
-        try:
+        if 'winner' in data:
             winner = data['winner']
+        else:
             loser = data['loser']
-        except KeyError:
-            self.error(400)
-            response['status'] = 'error'
-            response[
-                'msg'] = 'Missing winner (id of winner) or loser (id of loser)'
-            return self.response.out.write(json.dumps(response))
+
+        # try:
+        #     winner = data['winner']
+        #     loser = data['loser']
+        # except KeyError:
+        #     self.error(400)
+        #     response['status'] = 'error'
+        #     response[
+        #         'msg'] = 'Missing winner (id of winner) or loser (id of loser)'
+        #     return self.response.out.write(json.dumps(response))
 
         # try:
         #     session_id = data['sessid']
@@ -292,13 +297,28 @@ class EndGameHandler(webapp2.RequestHandler):
         if lobby:
             # If there is only 1 user left, just delete lobby
             if len(lobby.users) == 1:
+                if winner is not None:
+                    win_user = User.query(User.uuid == winner).get()
+                    win_user.win += 1
+                    win_user.put()
+                else:
+                    lose_user = User.query(User.uuid == loser).get()
+                    lose_user.loss += 1
+                    lose_user.put()
                 lobby.key.delete()
             # Otherwise, remove the user from lobby
-            # Update both user's statistics
+            # Update the user's statistics
             else:
                 lobby.users.remove(user_id)
                 lobby.put()
-                update_users(winner, loser)
+                if winner is not None:
+                    win_user = User.query(User.uuid == winner).get()
+                    win_user.win += 1
+                    win_user.put()
+                else:
+                    lose_user = User.query(User.uuid == loser).get()
+                    lose_user.loss += 1
+                    lose_user.put()
 
         # TODO: Session cleanup
 
