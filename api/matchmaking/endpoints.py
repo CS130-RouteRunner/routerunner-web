@@ -51,9 +51,11 @@ class NewUserHandler(webapp2.RequestHandler):
             response['msg'] = 'Missing uid (User id)'
             return self.response.out.write(json.dumps(response))
 
-        logging.info("New user (" + str(uid) + ") has joined RouteRunner.")
-        user = User(uuid=uid, nickname=uid)
-        user.put()
+        user = User.query(User.uuid == uid).get()
+        if user is None:
+            logging.info("New user (" + str(uid) + ") has joined RouteRunner.")
+            user = User(uuid=uid, nickname=uid)
+            user.put()
 
 
 class NewLobbyHandler(webapp2.RequestHandler):
